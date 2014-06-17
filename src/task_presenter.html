@@ -1,0 +1,268 @@
+<!-- css -->
+<style type="text/css">
+/* common */
+.dispn{display:none}
+/* particular */
+#page{width:100%;min-height:383px;height:383px;overflow-x:hidden;overflow-y:auto;background-color:#F5F5F5;border:1px solid rgba(0,0,0,0.15);border-radius:4px}
+.fwb{font-weight:bold}
+.mb1{margin-bottom:1px}
+.ainfo{font-size:0.88em;margin:1px}
+.mb0{margin-bottom:0}
+.mb5{margin-bottom:5px}
+.textarea{resize:none;width:97%}
+.answers{height:225px}
+.comments{height:145px}
+.size12{font-size:12px}
+</style>
+
+<!-- Messages for the user -->
+<div id="row" class="row">
+    <div id="messages" class="span6 offset2" style="height:35px;"> <!-- width:460px; + margin-left:180px; = 640px -->
+        <!-- Loading alert box -->
+        <div id="loading" class="alert alert-info dispn">
+            <a class="close">×</a>
+            <span>Cargando la tarea...</span>
+        </div>
+        <!-- Success alert box -->
+        <div id="success" class="alert alert-success dispn">
+            <a class="close">×</a>
+            <span><strong>Bien hecho</strong>, tu respuesta se ha guardado</span>
+        </div>
+        <!-- Finish alert box -->
+        <div id="finish" class="alert alert-success dispn">
+            <span><strong>Enhorabuena</strong>, has participado en todas las tareas disponibles</span>
+            <br/>
+            <div class="alert-actions">
+                <a class="btn small" href="/">Volver</a>
+                <a class="btn small" href="/app">o, ver otras aplicaciones</a>
+            </div>
+        </div>
+        <!-- Error alert box -->
+        <div id="error" class="alert alert-error dispn">
+            <a class="close">×</a>
+            <span><strong>Error</strong>, por favor póngase en contacto con los administradores del sitio</span>
+        </div>
+    </div>
+</div>
+
+<!--
+Task DOM for loading the needed information.
+It uses the class="skeleton" to identify the elements that belong to the task.
+-->
+
+<!-- Items for the user -->
+<div id="skeleton" class="row skeleton"> <!-- 540px + 380px = 920px -->
+    <!-- Left -->
+    <div id="left" class="span7"> <!-- width:540px; -->
+        <h1>Identificación propuestas electorales.<br/>¿A qué se compromete el partido político en su programa electoral?</h1>
+        <h5 id="breadcrumbs" class="size12"></h5>
+        <h5 id="pdf_pages" class="size12"></h5>
+        <h6 id="pdf_url" class="size12">Puedes consultar el programa electoral completo <a target="_blank" href="http://proyectos.analizo.info/static/apps/ape/YYYY/xxxx/data/xxxx-YYYY.pdf" title="Programa del partido político XXXX (XXXX) para las Elecciones al Parlamento Europeo 2014">aquí</a>.</h6>
+        <div id="page"></div>
+    </div>
+    <!-- Right -->
+    <div id="right" class="span5"> <!-- width:380px; -->
+        <!-- Feedback -->
+        <div id="feedback" style="margin-top:10px;">
+            <p>Estas trabajando en la tarea: <span id="task-id" class="label label-warning">#</span></p>
+            <p>Has completado: <span id="done" class="label label-info">#</span> tareas de <span id="total" class="label label-inverse">#</span></p>
+        </div>
+        <!-- Progress bar -->
+        <div id="progress_bar">
+            <div class="progress progress-striped" style="margin-bottom:10px;">
+                <div id="progress" rel="tooltip" title="#" class="bar" style="width:0%;"></div>
+            </div>
+        </div>
+        <!-- Submission -->
+        <div id="submission">
+            <h5 class="fwb mb1">Propuestas electorales identificadas "<span style="color:#608325">propuesta: </span>"</h5>
+            <h6 class="ainfo">* Este cuadro se rellena automáticamente con las propuestas seleccionadas.</h6>
+            <textarea id="answer" class="textarea answers mb0" maxlength="10000"></textarea>
+            <h5 class="fwb">Tus comentarios (Opcional)</h5>
+            <textarea id="comments" class="textarea comments mb5" maxlength="10000"></textarea>
+            <button id="enviar" class="btn btn-submit">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<!-- code -->
+<script type="text/javascript">
+$(document).ready(function() {
+
+    var app_short_name = "ape-xxxx-YYYY";
+    var base_url = "http://proyectos.analizo.info/static/apps/ape/YYYY/xxxx/tasks/";
+
+    // Disable mouse right clic
+    $(document).bind("contextmenu", function(e) {
+        e.preventDefault();
+    });
+
+    // Allow only backspace and delete
+    $("#answer").keydown(function(e) {
+        if (e.keyCode != 8 && e.keyCode != 46) { // Backspace - Delete
+            e.preventDefault();
+        }
+    });
+
+    // When the task is loaded, do...
+    pybossa.taskLoaded(function(task, deferred) {
+        if (!$.isEmptyObject(task)) {
+            task.file_url = base_url + task.info.file;
+            var breadcrumb = $.trim(task.info.pdf_title_1);
+            if (breadcrumb != "") {
+                var sep = " >> ";
+                task.breadcrumbs = breadcrumb;
+                breadcrumb = $.trim(task.info.pdf_title_2);
+                if (breadcrumb != "") {
+                    task.breadcrumbs += sep + breadcrumb;
+                    breadcrumb = $.trim(task.info.pdf_title_3);
+                    if (breadcrumb != "") {
+                        task.breadcrumbs += sep + breadcrumb;
+                        breadcrumb = $.trim(task.info.pdf_title_4);
+                        if (breadcrumb != "") {
+                            task.breadcrumbs += sep + breadcrumb;
+                            breadcrumb = $.trim(task.info.pdf_title_5);
+                            if (breadcrumb != "") {
+                                task.breadcrumbs += sep + breadcrumb;
+                                breadcrumb = $.trim(task.info.pdf_title_6);
+                                if (breadcrumb != "") {
+                                    task.breadcrumbs += sep + breadcrumb;
+                                    breadcrumb = $.trim(task.info.pdf_title_7);
+                                    if (breadcrumb != "") {
+                                        task.breadcrumbs += sep + breadcrumb;
+                                        breadcrumb = $.trim(task.info.pdf_title_8);
+                                        if (breadcrumb != "") {
+                                            task.breadcrumbs += sep + breadcrumb;
+                                            breadcrumb = $.trim(task.info.pdf_title_9);
+                                            if (breadcrumb != "") {
+                                                task.breadcrumbs += sep + breadcrumb;
+                                                breadcrumb = $.trim(task.info.pdf_title_10);
+                                                if (breadcrumb != "") {
+                                                    task.breadcrumbs += sep + breadcrumb;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                task.breadcrumbs = "";
+            }
+            var pdf_page_start = $.trim(task.info.pdf_page_start);
+            var pdf_page_end = $.trim(task.info.pdf_page_end);
+            if (pdf_page_end != "") {
+                task.pdf_pages = "Páginas: " + pdf_page_start + " a " + pdf_page_end;
+            } else {
+                task.pdf_pages = "Página: " + pdf_page_start;
+            }
+            $("#page").unbind("mouseup");
+            $("#page").mouseup(function() {
+                var selection = "getSelection" in window ? window.getSelection() : "selection" in document ? document.selection : null;
+                if (selection != null) {
+                    selection = $.trim(selection);
+                    if (selection.length > 10) {
+                        var current = $("#answer").val();
+                        if ($.trim(current) == "No hay proposiciones") {
+                            current = "";
+                            $("#answer").val("");
+                        }
+                        var idx = "propuesta: ";
+                        if (current != "") {
+                            current = current + "\n" + idx + selection;
+                        } else {
+                            current = idx + selection;
+                        }
+                        $("#answer").val(current + "\n");
+                        $("#answer").scrollTop($("#answer")[0].scrollHeight);
+                        if (window.getSelection) {
+                            if (window.getSelection().empty) { // Chrome
+                                window.getSelection().empty();
+                            } else if (window.getSelection().removeAllRanges) { // Firefox
+                                window.getSelection().removeAllRanges();
+                            }
+                        } else if (document.selection) { // IE
+                            document.selection.empty();
+                        } else {
+                            return;
+                        }
+                    }
+                }
+            });
+        }
+        deferred.resolve(task);
+    });
+
+    /*
+    Present the current task to the user.
+    Load the task data into the HTML DOM.
+    */
+
+    function loadUserProgress(task_id) {
+        pybossa.userProgress(app_short_name).done(function(data) {
+            $("#task-id").html(task_id);
+            $("#done").text(data.done);
+            $("#total").text(data.total);
+            var p = Math.round((data.done * 100) / data.total);
+            $("#progress").css("width", p.toString() + "%");
+            $("#progress").attr("title", p.toString() + "% completado");
+            $("#progress").tooltip({"placement":"left"});
+        });
+    }
+
+    pybossa.presentTask(function(task, deferred) {
+        if (!$.isEmptyObject(task)) {
+            $("#loading").fadeIn(1000);
+            loadUserProgress(task.id);
+            $("#page").load(task.file_url, function(responseText, textStatus, XMLHttpRequest) {
+                if (textStatus == "success") {
+                    $("#answer").val("No hay proposiciones");
+                    $("#comments").val("");
+                    $("#breadcrumbs").html(task.breadcrumbs);
+                    $("#pdf_pages").html(task.pdf_pages);
+                    $("#page").scrollTop(0);
+                    $("#page").fadeIn(1000);
+                    $("#enviar").fadeIn(1000);
+                    $(".btn-submit").off("click").on("click", function() {
+                        if (confirm("Necesitamos que confirmes el envío de tu análisis, por favor.")) {
+                            var answer = $.trim($("#answer").val());
+                            if (answer == "") {
+                                answer = "No hay proposiciones\n";
+                                $("#answer").val(answer);
+                            }
+                            pybossa.saveTask(task.id, {"propuestas": answer, "comentarios": $.trim($("#comments").val())}).done(function() {
+                                $.when(deferred.resolve()).done(function() {
+                                    $("#loading").hide();
+                                    $("#success").fadeIn(1000);
+                                    $("#enviar").fadeOut(1000);
+                                    $("#page").fadeOut(1000);
+                                    $("#answer").val("");
+                                    $("#comments").val("");
+                                    setTimeout(function() {
+                                        $("#success").fadeOut(1000);
+                                    }, 1500);
+                                });
+                            });
+                        }
+                    });
+                    $("#loading").fadeOut(1000);
+                } else {
+                    $("#loading").hide();
+                    $(".skeleton").hide();
+                    $("#error").show();
+                }
+            });
+        } else {
+            $(".skeleton").fadeOut(1000);
+            setTimeout(function() {
+                $("#success").hide();
+                $("#finish").fadeIn(1000);
+            }, 1500);
+        }
+    });
+
+    pybossa.run(app_short_name);
+});
+</script>
